@@ -39,7 +39,6 @@ func NewServer(pattern string) *Server {
 	}
 }
 
-
 func (s *Server) Add(c *Client) {
 	s.addClientCh <- c
 }
@@ -72,7 +71,7 @@ func (s *Server) sendAll(msg *Message) {
 	}
 }
 
-func (s *Server) WorkToListen(){
+func (s *Server) WorkToListen() {
 	onConnected := func(ws *websocket.Conn) {
 		defer func() {
 			err := ws.Close()

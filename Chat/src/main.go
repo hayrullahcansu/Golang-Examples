@@ -7,7 +7,8 @@ import (
 )
 
 func main() {
-	server := packages.NewServer("/entry")
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	server := packages.NewServer("/chatroom")
 	go server.WorkToListen()
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

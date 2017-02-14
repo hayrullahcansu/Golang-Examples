@@ -32,7 +32,7 @@ func NewClient(ws *websocket.Conn, server *Server) *Client {
 	return &Client{IDGenarator, ws, server, messageChan, doneCh}
 }
 
-func (c *Client) Write(msg *Message)  {
+func (c *Client) Write(msg *Message) {
 	select {
 	case c.recieveMsgChan <- msg:
 	default:
@@ -48,7 +48,7 @@ func (c *Client) Listen() {
 	c.RequestRead()
 }
 
-func (c *Client)RequestWrite()  {
+func (c *Client)RequestWrite() {
 	for {
 		select {
 
@@ -66,8 +66,7 @@ func (c *Client)RequestWrite()  {
 	}
 }
 
-
-func (c *Client)RequestRead()  {
+func (c *Client)RequestRead() {
 	for {
 		select {
 		// receive done request
