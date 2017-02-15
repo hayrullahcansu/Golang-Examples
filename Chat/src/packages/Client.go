@@ -82,6 +82,11 @@ func (c *Client)RequestRead() {
 			if err == io.EOF {
 				c.doneChan <- true
 			} else if err != nil {
+
+				//added this code
+				//when client closed the connection, server was printing error messages endlessly
+				c.doneChan <- true
+
 				c.server.Err(err)
 			} else {
 				c.server.SendAll(&msg)

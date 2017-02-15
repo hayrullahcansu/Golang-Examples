@@ -56,6 +56,8 @@ func RecieveMessage(ws *websocket.Conn) {
 		err := websocket.JSON.Receive(ws, &msg)
 		if (err != nil) {
 			log.Println(err)
+			ws.Close()
+			return
 		}
 		fmt.Println(msg.ToString())
 	}
@@ -77,4 +79,5 @@ func WriteMessage(ws *websocket.Conn) {
 		}
 	}
 }
+//func CheckMessage(m *string)
 
