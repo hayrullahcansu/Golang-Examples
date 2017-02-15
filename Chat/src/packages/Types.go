@@ -1,8 +1,9 @@
 package packages
 
 type Message struct {
-	Client  string `json:"client"`
-	Content string `json:"content"`
+	Client      string `json:"client"`
+	ContentCode string `json:"content_code"`
+	Content     string `json:"content"`
 }
 
 func (self *Message) String() string {
