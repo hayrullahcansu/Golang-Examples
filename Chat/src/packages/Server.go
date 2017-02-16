@@ -4,6 +4,7 @@ import (
 	"golang.org/x/net/websocket"
 	"net/http"
 	"log"
+	"strconv"
 )
 
 type Server struct {
@@ -40,6 +41,8 @@ func NewServer(pattern string) *Server {
 }
 
 func (s *Server) Add(c *Client) {
+	msg := Message{Client:"Server", ContentCode:30, Content:"UserName"}
+	defer c.Write(&msg)
 	s.addClientCh <- c
 }
 
@@ -72,14 +75,17 @@ func (s *Server) sendAll(msg *Message) {
 }
 
 func (s *Server) GetHelp() string {
-	h := "Writable special request codes\n\n" +
-		"--list     gets online user lists\n"
+	h := "Writable special request codes are below\n\n" +
+		"-help     helps\n" +
+		"-list     gets online user lists\n"
 	return h
 }
 func (s *Server) GetUserList() string {
-	h := "Online Users\n\n"
-	for i, c := range s.clients {
-		h += (string)(i + 1) + ". " + c.UserName
+	h := strconv.Itoa(len(s.clients)) + " Users are Online now\n\n"
+	i := 1
+	for _, c := range s.clients {
+		h += strconv.Itoa(i) + ". " + c.UserName + "\n"
+		i++
 	}
 	return h
 }

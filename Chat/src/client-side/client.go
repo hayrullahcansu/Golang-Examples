@@ -109,7 +109,6 @@ func WriteMessage(ws *websocket.Conn) {
 		} else {
 			msg.ContentCode = 1
 		}
-		log.Println(msg.ContentCode, msg.Client, msg.Content)
 		err = websocket.JSON.Send(ws, msg)
 		if (err != nil) {
 			log.Println(err)

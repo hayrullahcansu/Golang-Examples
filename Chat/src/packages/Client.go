@@ -91,15 +91,11 @@ func (c *Client)RequestRead() {
 				c.doneChan <- true
 				c.server.Err(err)
 			} else {
-				log.Println(msg.ContentCode,msg.Client,msg.Content)
 				if msg.ContentCode >= 20 && msg.ContentCode <= 29 {
-					log.Println(msg.ContentCode,msg.Client,msg.Content)
 					c.server.specialRequestFromClient(c, &msg)
 				} else if msg.ContentCode >= 30 && msg.ContentCode <= 39 {
-					log.Println(msg.ContentCode,msg.Client,msg.Content)
 					c.server.specialRequestFromServer(c, &msg)
 				} else {
-					log.Println(msg.ContentCode,msg.Client,msg.Content)
 					c.server.SendAll(&msg)
 				}
 			}
