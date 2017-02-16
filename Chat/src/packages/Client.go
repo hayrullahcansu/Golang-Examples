@@ -13,6 +13,7 @@ var IDGenarator = 0
 
 type Client struct {
 	ID             int
+	UserName       string
 	WS             *websocket.Conn
 	server         *Server
 	recieveMsgChan chan *Message
@@ -29,7 +30,7 @@ func NewClient(ws *websocket.Conn, server *Server) *Client {
 	IDGenarator++
 	messageChan := make(chan *Message, FrameBufferSize)
 	doneCh := make(chan bool)
-	return &Client{IDGenarator, ws, server, messageChan, doneCh}
+	return &Client{IDGenarator, "", ws, server, messageChan, doneCh}
 }
 
 func (c *Client) Write(msg *Message) {
@@ -84,12 +85,23 @@ func (c *Client)RequestRead() {
 			} else if err != nil {
 
 				//added this code
-				//when client closed the connection, server was printing error messages endlessly
+				//when client closed the connection,
+				//server was printing error messages endlessly
+				//fixed it
 				c.doneChan <- true
-
 				c.server.Err(err)
 			} else {
-				c.server.SendAll(&msg)
+				log.Println(msg.ContentCode,msg.Client,msg.Content)
+				if msg.ContentCode >= 20 && msg.ContentCode <= 29 {
+					log.Println(msg.ContentCode,msg.Client,msg.Content)
+					c.server.specialRequestFromClient(c, &msg)
+				} else if msg.ContentCode >= 30 && msg.ContentCode <= 39 {
+					log.Println(msg.ContentCode,msg.Client,msg.Content)
+					c.server.specialRequestFromServer(c, &msg)
+				} else {
+					log.Println(msg.ContentCode,msg.Client,msg.Content)
+					c.server.SendAll(&msg)
+				}
 			}
 		}
 	}

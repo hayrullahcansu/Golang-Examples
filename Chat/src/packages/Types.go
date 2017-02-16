@@ -2,7 +2,7 @@ package packages
 
 type Message struct {
 	Client      string `json:"client"`
-	ContentCode string `json:"content_code"`
+	ContentCode int `json:"content_code"`
 	Content     string `json:"content"`
 }
 

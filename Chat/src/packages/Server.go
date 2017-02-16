@@ -71,6 +71,45 @@ func (s *Server) sendAll(msg *Message) {
 	}
 }
 
+func (s *Server) GetHelp() string {
+	h := "Writable special request codes\n\n" +
+		"--list     gets online user lists\n"
+	return h
+}
+func (s *Server) GetUserList() string {
+	h := "Online Users\n\n"
+	for i, c := range s.clients {
+		h += (string)(i + 1) + ". " + c.UserName
+	}
+	return h
+}
+func (s *Server) specialRequestFromClient(c *Client, m *Message) {
+
+	//content code equals is 20-29 means
+	// about special request from client
+	msg := Message{Client:"Server", ContentCode:20}
+	switch m.Content {
+	case "-help":
+		msg.Content = s.GetHelp()
+		c.Write(&msg)
+	case "-list":
+		msg.Content = s.GetUserList()
+		c.Write(&msg)
+	}
+}
+func (s *Server) specialRequestFromServer(c *Client, m *Message) {
+
+	//content code equals is 30-39 means
+	// about special request from server
+	if m.ContentCode == 31 {
+		switch m.Content {
+		case "UserName":
+			//save usernick to map of clients
+			c.UserName = m.Client
+		}
+	}
+}
+
 func (s *Server) WorkToListen() {
 	onConnected := func(ws *websocket.Conn) {
 		defer func() {

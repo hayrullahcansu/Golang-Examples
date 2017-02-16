@@ -6,6 +6,7 @@ import (
 	"golang.org/x/net/websocket"
 	"bufio"
 	"os"
+	"strings"
 )
 
 var origin = "http://localhost/"
@@ -13,7 +14,7 @@ var url = "ws://localhost:8080/chatroom"
 
 type Message struct {
 	Client      string `json:"client"`
-	ContentCode string `json:"content_code"`
+	ContentCode int `json:"content_code"`
 	Content     string `json:"content"`
 }
 
@@ -59,7 +60,34 @@ func RecieveMessage(ws *websocket.Conn) {
 			ws.Close()
 			return
 		}
-		fmt.Println(msg.ToString())
+
+		//client got a frame from server
+		//firstly, check content code
+		//message code equals is 30 means
+		// server request something client
+		if msg.ContentCode == 30 {
+			switch msg.Content {
+			case "UserName":
+				msg.Client = nick
+				msg.ContentCode = 31
+				msg.Content = "UserName"
+				//answer to server for request
+				//tell our username
+				err = websocket.JSON.Send(ws, msg)
+				if (err != nil) {
+					log.Println(err)
+				}
+			}
+
+		} else if msg.ContentCode >= 20 && msg.ContentCode <= 29 {
+			//content code is equals 20-29 means
+			// about special request's answer from server
+			fmt.Println(msg.ToString())
+		} else if msg.ContentCode == 1 {
+			//content code is equals 1 means
+			// server send frame to print to screen
+			fmt.Println(msg.ToString())
+		}
 	}
 }
 func WriteMessage(ws *websocket.Conn) {
@@ -71,13 +99,21 @@ func WriteMessage(ws *websocket.Conn) {
 		if err != nil {
 			log.Println(err)
 		}
+		msg := Message{Client:nick}
+		//clients checks message
 
-		msg := Message{Client:nick, Content:input}
+		input = strings.Replace(input, "\n", "", -1)
+		msg.Content = input
+		if input == "-help" || input == "-list" {
+			msg.ContentCode = 20
+		} else {
+			msg.ContentCode = 1
+		}
+		log.Println(msg.ContentCode, msg.Client, msg.Content)
 		err = websocket.JSON.Send(ws, msg)
 		if (err != nil) {
 			log.Println(err)
 		}
 	}
 }
-//func CheckMessage(m *string)
 
