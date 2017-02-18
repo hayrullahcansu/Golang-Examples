@@ -18,7 +18,7 @@ For more information about [websocket][1]
 
 ###Server-side source code files
 #### <i class="icon-file"></i> main.go 
-It starts to run server and listen the port for handling messages and connections
+It starts to run server and listen the port for handling messages and connections.
 
 #### <i class="icon-file"></i> packages/Client.go 
 It explains how clients which connected a server behave on the side of server.
