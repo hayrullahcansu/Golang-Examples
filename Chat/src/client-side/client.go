@@ -3,21 +3,22 @@ package main
 import (
 	"log"
 	"fmt"
-	"golang.org/x/net/websocket"
+	"golang.org/x/net/websocket2"
 	"bufio"
 	"os"
 	"strings"
+	"net/url"
+	"flag"
+	"encoding/json"
 )
 
-var origin = "http://localhost/"
-var url = "ws://localhost:8080/chatroom"
-
 type Message struct {
-	Client      string `json:"client"`
+	Client      string `json:"client"	`
 	ContentCode int `json:"content_code"`
 	Content     string `json:"content"`
 }
 
+var addr = flag.String("addr", "127.0.0.1:8080", "http service address")
 var nick string
 
 func (msg *Message)ToString() string {
@@ -38,29 +39,41 @@ func main() {
 		} else {
 			return
 		}
-
 	}
 }
 func LoginChatRoom() {
-	ws, err := websocket.Dial(url, "", origin)
+
+	flag.Parse()
+	u := url.URL{Scheme: "ws", Host: *addr, Path: "/chatroom"}
+	log.Printf("connecting to %s", u.String())
+	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
-		log.Fatal(err)
+
+		log.Fatal("dial:", err)
+
 	}
+	defer c.Close()
 	//reacieve messages
-	go RecieveMessage(ws)
+	go RecieveMessage(c)
 	//send messages
-	WriteMessage(ws)
+	WriteMessage(c)
 }
 func RecieveMessage(ws *websocket.Conn) {
 	for {
 		var msg Message
-		err := websocket.JSON.Receive(ws, &msg)
-		if (err != nil) {
-			log.Println(err)
-			ws.Close()
-			return
+		_, message, err := ws.ReadMessage()
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
+				log.Printf("error: %v", err)
+			}
+			break
 		}
-
+		log.Printf(string(message))
+		err = json.Unmarshal(message, &msg)
+		if err != nil {
+			log.Printf("error: %v", err)
+			break
+		}
 		//client got a frame from server
 		//firstly, check content code
 		//message code equals is 30 means
@@ -73,7 +86,7 @@ func RecieveMessage(ws *websocket.Conn) {
 				msg.Content = "UserName"
 				//answer to server for request
 				//tell our username
-				err = websocket.JSON.Send(ws, msg)
+				err = websocket.WriteJSON(ws, msg)
 				if (err != nil) {
 					log.Println(err)
 				}
@@ -109,7 +122,7 @@ func WriteMessage(ws *websocket.Conn) {
 		} else {
 			msg.ContentCode = 1
 		}
-		err = websocket.JSON.Send(ws, msg)
+		err = websocket.WriteJSON(ws, msg)
 		if (err != nil) {
 			log.Println(err)
 		}
