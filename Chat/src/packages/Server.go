@@ -60,6 +60,9 @@ func (s *Server) SpecialRequestFromServer(c *Client, m *Message) {
 		case "UserName":
 			//save usernick to map of clients
 			c.UserName = m.Client
+			msg := Message{Client:"Server", ContentCode:1}
+			msg.Content = m.Client + ", Wellcome to our Chatroom. Have a nice chats!"
+			c.send <- msg
 		}
 	}
 }

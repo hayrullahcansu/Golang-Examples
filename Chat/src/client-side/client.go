@@ -13,8 +13,8 @@ import (
 )
 
 type Message struct {
-	Client      string `json:"client"	`
-	ContentCode int `json:"content_code"`
+	Client      string `json:"client"`
+	ContentCode int    `json:"content_code"`
 	Content     string `json:"content"`
 }
 
